@@ -52,7 +52,7 @@ func CreatePayment(context *gin.Context) {
 	return
 }
 
-func GetPayment(context *gin.Context) {
+func GetPaymentById(context *gin.Context) {
 	ID := context.Param("id")
 	paymentModel, ok := paymentMap[ID]
 	if !ok {

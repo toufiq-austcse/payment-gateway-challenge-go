@@ -47,7 +47,7 @@ func main() {
 	r.GET("/swagger/*any", gs.WrapHandler(sf.Handler))
 	paymentGroup := r.Group("api/v1/payments")
 	paymentGroup.POST("", handlers.CreatePayment)
-	paymentGroup.GET(":id", handlers.GetPayment)
+	paymentGroup.GET(":id", handlers.GetPaymentById)
 	r.Run(":8081")
 }
 
