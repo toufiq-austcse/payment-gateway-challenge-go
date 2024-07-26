@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
-
 	"github.com/cko-recruitment/payment-gateway-challenge-go/docs"
+	"github.com/cko-recruitment/payment-gateway-challenge-go/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	sf "github.com/swaggo/files"
 	gs "github.com/swaggo/gin-swagger"
+	"net/http"
 )
 
 var (
@@ -25,6 +26,13 @@ var (
 
 // @securityDefinitions.basic	BasicAuth
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	} else {
+		fmt.Println(".env file loaded")
+	}
+
 	fmt.Printf("version %s, commit %s, built at %s", version, commit, date)
 
 	var mode string
@@ -37,7 +45,10 @@ func main() {
 	r := gin.Default()
 	r.GET("/ping", Ping)
 	r.GET("/swagger/*any", gs.WrapHandler(sf.Handler))
-	r.Run(":8080")
+	paymentGroup := r.Group("api/v1/payments")
+	paymentGroup.POST("", handlers.CreatePayment)
+	paymentGroup.GET(":id", handlers.GetPayment)
+	r.Run(":8081")
 }
 
 // PingExample godoc
