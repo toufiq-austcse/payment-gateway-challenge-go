@@ -1,7 +1,6 @@
 package api_response
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -56,7 +55,6 @@ func BuildResponseWithPagination(code int, message string, data interface{}, pag
 func BuildErrorResponse(code int, message string, err string, data interface{}) Response {
 	var errors []string
 	if err != "" {
-		fmt.Println("Dhukse")
 		errors = strings.Split(err, "\n")
 	}
 

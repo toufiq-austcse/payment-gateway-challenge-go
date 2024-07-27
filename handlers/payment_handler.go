@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/cko-recruitment/payment-gateway-challenge-go/apimodels/req"
+	"github.com/cko-recruitment/payment-gateway-challenge-go/enums"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/mapper"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/models"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/pkg/api_response"
@@ -28,7 +29,7 @@ func CreatePayment(context *gin.Context) {
 
 	err := body.Validate(context)
 	if err != nil {
-		errRes := api_response.BuildErrorResponse(http.StatusBadRequest, "Rejected", err.Error(), nil)
+		errRes := api_response.BuildErrorResponse(http.StatusBadRequest, enums.REJECTED, err.Error(), nil)
 		context.JSON(errRes.Code, errRes)
 		return
 	} else {
