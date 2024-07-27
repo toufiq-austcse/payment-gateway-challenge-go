@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/cko-recruitment/payment-gateway-challenge-go/apimodels/req"
-	"github.com/cko-recruitment/payment-gateway-challenge-go/enums"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/mapper"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/models"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/pkg/api_response"
@@ -29,8 +28,9 @@ func CreatePayment(context *gin.Context) {
 
 	err := body.Validate(context)
 	if err != nil {
-		paymentStatus = enums.REJECTED
-		message = err.Error()
+		errRes := api_response.BuildErrorResponse(http.StatusBadRequest, "Rejected", err.Error(), nil)
+		context.JSON(errRes.Code, errRes)
+		return
 	} else {
 		expiryDate := BuildExpiryDate(body.ExpirationMonth, body.ExpirationYear)
 		status, authError := http_clients.AuthorizePayment(body.CardNumber, expiryDate, body.Currency, body.Amount, body.CVV)

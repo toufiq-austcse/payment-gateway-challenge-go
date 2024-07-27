@@ -14,7 +14,7 @@ type CreatePaymentReqModel struct {
 }
 
 func (model *CreatePaymentReqModel) Validate(c *gin.Context) error {
-	err := c.ShouldBindJSON(model)
+	err := c.BindJSON(model)
 	if err != nil {
 		return err
 	}
