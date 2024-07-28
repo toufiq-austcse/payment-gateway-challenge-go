@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/apimodels/req"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/enums"
 	"github.com/cko-recruitment/payment-gateway-challenge-go/mapper"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var paymentMap = make(map[string]models.Payment)
@@ -33,7 +35,12 @@ func CreatePayment(context *gin.Context) {
 		context.JSON(errRes.Code, errRes)
 		return
 	} else {
-		expiryDate := BuildExpiryDate(body.ExpirationMonth, body.ExpirationYear)
+		expiryDate, expiryDateErr := BuildExpiryDate(body.ExpirationMonth, body.ExpirationYear)
+		if expiryDateErr != nil {
+			errRes := api_response.BuildErrorResponse(http.StatusBadRequest, enums.REJECTED, expiryDateErr.Error(), nil)
+			context.JSON(errRes.Code, errRes)
+			return
+		}
 		status, authError := http_clients.AuthorizePayment(body.CardNumber, expiryDate, body.Currency, body.Amount, body.CVV)
 		if authError != nil {
 			errRes := api_response.BuildErrorResponse(http.StatusInternalServerError, "Internal Server Error", authError.Error(), nil)
@@ -67,11 +74,23 @@ func GetPaymentById(context *gin.Context) {
 	return
 }
 
-func BuildExpiryDate(expiryMonth int, expiryYear int) string {
+func BuildExpiryDate(expiryMonth int, expiryYear int) (string, error) {
+	currentYear, currentMonth, _ := time.Now().Date()
+	currentMonthInt := int(currentMonth)
+
+	if expiryYear < currentYear {
+		return "", errors.New("expiry date must be in future date")
+	}
+	if expiryYear == currentYear {
+		if expiryMonth < currentMonthInt {
+			return "", errors.New("expiry date must be in future date")
+		}
+	}
+
 	expiryMonthInString := strconv.Itoa(expiryMonth)
 	if expiryMonth < 10 {
 		expiryMonthInString = "0" + strconv.Itoa(expiryMonth)
 	}
 
-	return expiryMonthInString + "/" + strconv.Itoa(expiryYear)
+	return expiryMonthInString + "/" + strconv.Itoa(expiryYear), nil
 }
